@@ -20,6 +20,7 @@ contract Wager {
   AggregatorV3Interface private immutable i_priceFeed;
 
   /* Wager Variables */
+  uint256 private s_lastTimeStamp;
 
   constructor(
     uint256 wagerA,
@@ -33,5 +34,6 @@ contract Wager {
     i_playerA = playerA;
     i_playerB = playerB;
     i_priceFeed = AggregatorV3Interface(priceFeedInterface);
+    s_lastTimeStamp = block.timestamp;
   }
 }
