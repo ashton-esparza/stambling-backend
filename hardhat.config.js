@@ -4,6 +4,7 @@ require("hardhat-deploy");
 require("dotenv").config();
 
 const ACCOUNT1_PRIVATE_KEY = process.env.ACCOUNT1_PRIVATE_KEY;
+const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL;
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL;
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
