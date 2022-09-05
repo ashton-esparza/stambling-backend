@@ -11,12 +11,11 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   if (developmentChains.includes(network.name)) {
     // Get locally deployed mock data feed contract
     log("Getting address for locally deployed ethUsdAggregator contract...");
-    // const ethUsdAggregator = await deployments.get("MockV3Aggregator");
-    // ethUsdPriceFeedAddress = ethUsdAggregator.address;
-    ethUsdPriceFeedAddress = networkConfig[chainId]["ethUsdPriceFeed"];
+    const ethUsdAggregator = await deployments.get("MockAggregator");
+    ethUsdPriceFeedAddress = ethUsdAggregator.address;
     log(`ethUsdPriceFeed is: ${ethUsdPriceFeedAddress}`);
   } else {
-    log("done");
+    log("Trying non-local test network; nothing coded will fail...");
   }
   log("----------------------------------------------------");
   log("Deploying FundMe and waiting for confirmations...");
