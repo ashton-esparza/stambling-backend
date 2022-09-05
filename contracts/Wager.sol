@@ -18,10 +18,10 @@ contract Wager {
     uint256 s_playerPrediction;
   }
   enum WagerState {
-    REGISTERING,
-    ACTIVE,
-    CALCULATING,
-    COMPLETE
+    REGISTERING, //waiting for players to enter wager
+    ACTIVE, //waiting for time to end
+    CALCULATING, //getting result from data feed and determining winner
+    COMPLETE //wager complete and funds sent to winner
   }
 
   /* State Variables */

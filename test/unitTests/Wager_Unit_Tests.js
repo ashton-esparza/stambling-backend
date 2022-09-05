@@ -35,6 +35,14 @@ const { developmentChains } = require("../../helper-hardhat-config");
           expect(players[0].s_playerPrediction).to.equal(predictionAmount);
           expect(players.length).to.equal(1);
         });
+
+        it("Wager state is active", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(player1, predictionAmount);
+          await wager.enterWager(player2, predictionAmount);
+          //const wagerState = await wager.getWagerState();
+          expect(await wager.getWagerState()).to.equal(1);
+        });
       });
 
       describe("Error Handling", function () {
