@@ -4,9 +4,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
+  const initialPrice = "1500";
   // If we are on a local development network, we need to deploy mocks!
   if (chainId == 31337) {
-    log("------------------------------------------------");
+    log("----------------START-00-------------------------------");
     log("Local network detected! Deploying mocks...");
     await deploy("MockAggregator", {
       contract: "MockAggregator",
@@ -15,16 +16,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       args: [],
       waitConfirmations: network.config.blockConfirmations || 1,
     });
-    log("Mocks Deployed! Now setting initial price...");
-    //const ethUsdAggregator = await deployments.get("MockAggregator");
-    //const mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
+    log(`Mocks Deployed! Now setting initial price to ${initialPrice}...`);
     const mockAggregator = await ethers.getContract("MockAggregator", deployer);
-    const transactionResponse = await mockAggregator.setLatestAnswer("1500");
+    const transactionResponse = await mockAggregator.setLatestAnswer(initialPrice);
     await transactionResponse.wait();
-    log(`Got contract at: ${mockAggregator.address}`);
-    const latestAnswer = await mockAggregator.latestAnswer();
-    log(`LatestAnswer is ${latestAnswer}`);
-    log("------------------------------------------------");
+    log("----------------END-00---------------------------------");
   }
 };
 
