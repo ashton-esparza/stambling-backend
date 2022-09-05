@@ -5,15 +5,17 @@ const { developmentChains } = require("../../helper-hardhat-config");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Wager Unit Tests", function () {
-      let deployer, wager;
+      let deployer, wager, mockAggregator;
 
       beforeEach(async function () {
         deployer = (await getNamedAccounts()).deployer;
         await deployments.fixture(["all"]);
-        const wagerDeployments = await deployments.get("Wager");
-        const ethUsdAggregator = await deployments.get("MockAggregator");
-        wager = await ethers.getContractAt("Wager", wagerDeployments.address);
-        mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
+        wager = await ethers.getContract("Wager", deployer);
+        mockAggregator = await ethers.getContract("MockAggregator", deployer);
+        // const wagerDeployments = await deployments.get("Wager");
+        // const ethUsdAggregator = await deployments.get("MockAggregator");
+        // wager = await ethers.getContractAt("Wager", wagerDeployments.address);
+        // mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
       });
 
       describe("Contructor", function () {
