@@ -5,10 +5,10 @@ const { developmentChains } = require("../../helper-hardhat-config");
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Wager Unit Tests", function () {
-      let deployer, wager, mockAggregator;
+      let deployer, player1, player2, player3, wager, mockAggregator;
 
       beforeEach(async function () {
-        deployer = (await getNamedAccounts()).deployer;
+        ({ deployer, player1, player2, player3 } = await getNamedAccounts());
         await deployments.fixture(["all"]);
         wager = await ethers.getContract("Wager", deployer);
         mockAggregator = await ethers.getContract("MockAggregator", deployer);
@@ -37,14 +37,14 @@ const { developmentChains } = require("../../helper-hardhat-config");
         });
       });
 
-      // describe("Error Handling", function () {
-      //   it("Reverts if too many players attempt to enter", async function () {
-      //     const predictionAmount = 1450;
-      //     await wager.enterWager(deployer, predictionAmount);
-      //     const players = await wager.getPlayers();
-      //     expect(players[0].s_playerAddress).to.equal(deployer);
-      //     expect(players[0].s_playerPrediction).to.equal(predictionAmount);
-      //     expect(players.length).to.equal(1);
-      //   });
-      // });
+      describe("Error Handling", function () {
+        it("Reverts if too many players attempt to enter", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(player1, predictionAmount);
+          await wager.enterWager(player2, predictionAmount);
+          await expect(wager.enterWager(player3, predictionAmount)).to.be.revertedWith(
+            "Wager__Full"
+          );
+        });
+      });
     });
