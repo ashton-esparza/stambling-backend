@@ -40,7 +40,6 @@ const { developmentChains } = require("../../helper-hardhat-config");
           const predictionAmount = 1450;
           await wager.enterWager(player1, predictionAmount);
           await wager.enterWager(player2, predictionAmount);
-          //const wagerState = await wager.getWagerState();
           expect(await wager.getWagerState()).to.equal(1);
         });
       });
