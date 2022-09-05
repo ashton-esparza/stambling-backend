@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-deploy");
 require("dotenv").config();
+require("solidity-coverage");
 
 const ACCOUNT1_PRIVATE_KEY = process.env.ACCOUNT1_PRIVATE_KEY;
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL;

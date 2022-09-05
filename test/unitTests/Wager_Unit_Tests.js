@@ -12,16 +12,39 @@ const { developmentChains } = require("../../helper-hardhat-config");
         await deployments.fixture(["all"]);
         wager = await ethers.getContract("Wager", deployer);
         mockAggregator = await ethers.getContract("MockAggregator", deployer);
-        // const wagerDeployments = await deployments.get("Wager");
-        // const ethUsdAggregator = await deployments.get("MockAggregator");
-        // wager = await ethers.getContractAt("Wager", wagerDeployments.address);
-        // mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
       });
 
-      describe("Contructor", function () {
-        it("Initializes the aggregator correctly", async function () {
+      describe("Deployment", function () {
+        it("Initializes the aggregator address correctly", async function () {
           const mockAggregatorAddress = await wager.getAggregatorV3();
           assert.equal(mockAggregatorAddress, mockAggregator.address);
         });
+
+        it("Initializes the wager state correctly", async function () {
+          const wagerState = await wager.getWagerState();
+          assert.equal(wagerState, 0);
+        });
       });
+
+      describe("Functionality", function () {
+        it("Player is able to enter wager", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(deployer, predictionAmount);
+          const players = await wager.getPlayers();
+          expect(players[0].s_playerAddress).to.equal(deployer);
+          expect(players[0].s_playerPrediction).to.equal(predictionAmount);
+          expect(players.length).to.equal(1);
+        });
+      });
+
+      // describe("Error Handling", function () {
+      //   it("Reverts if too many players attempt to enter", async function () {
+      //     const predictionAmount = 1450;
+      //     await wager.enterWager(deployer, predictionAmount);
+      //     const players = await wager.getPlayers();
+      //     expect(players[0].s_playerAddress).to.equal(deployer);
+      //     expect(players[0].s_playerPrediction).to.equal(predictionAmount);
+      //     expect(players.length).to.equal(1);
+      //   });
+      // });
     });
