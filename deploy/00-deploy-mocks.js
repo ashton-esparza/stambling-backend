@@ -15,7 +15,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       args: [],
       waitConfirmations: network.config.blockConfirmations || 1,
     });
-    log("Mocks Deployed!");
+    log("Mocks Deployed! Now setting initial price...");
     const ethUsdAggregator = await deployments.get("MockAggregator");
     const mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
     const transactionResponse = await mockAggregator.setLatestAnswer("1500");

@@ -1,17 +1,25 @@
 const { assert, expect } = require("chai");
 const { network, getNamedAccounts, ethers } = require("hardhat");
-const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
+const { developmentChains } = require("../../helper-hardhat-config");
 
-describe("Wager Unit Tests", function () {
-  let deployer, wager;
+!developmentChains.includes(network.name)
+  ? describe.skip
+  : describe("Wager Unit Tests", function () {
+      let deployer, wager;
 
-  beforeEach(async function () {
-    deployer = (await getNamedAccounts()).deployer;
-    await deployments.fixture(["all"]);
-    wager = await ethers.getContract("Wager", deployer);
-  });
+      beforeEach(async function () {
+        deployer = (await getNamedAccounts()).deployer;
+        await deployments.fixture(["all"]);
+        const wagerDeployments = await deployments.get("Wager");
+        const ethUsdAggregator = await deployments.get("MockAggregator");
+        wager = await ethers.getContractAt("Wager", wagerDeployments.address);
+        mockAggregator = await ethers.getContractAt("MockAggregator", ethUsdAggregator.address);
+      });
 
-  describe("Contructor", function () {
-    isCallTrace("Initializes the wager correctly", async function () {});
-  });
-});
+      describe("Contructor", function () {
+        it("Initializes the aggregator correctly", async function () {
+          const mockAggregatorAddress = await wager.getAggregatorV3();
+          assert.equal(mockAggregatorAddress, mockAggregator.address);
+        });
+      });
+    });

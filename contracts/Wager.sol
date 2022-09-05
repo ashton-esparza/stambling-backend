@@ -49,4 +49,8 @@ contract Wager {
     s_players.push(Player({s_playerAddress: playerAddress, s_playerPrediction: playerPrediction}));
     //s_players = new address payable[](0); to reset array later
   }
+
+  function getAggregatorV3() public view returns (address) {
+    return address(i_priceFeed);
+  }
 }
