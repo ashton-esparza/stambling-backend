@@ -16,9 +16,11 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 31337,
+      blockConfirmations: 1,
     },
     localhost: {
       chainId: 31337,
+      blockConfirmations: 1,
     },
     rinkeby: {
       url: RINKEBY_RPC_URL,
