@@ -17,6 +17,7 @@ contract Wager is KeeperCompatibleInterface {
   struct Player {
     address s_playerAddress;
     uint256 s_playerPrediction;
+    int256 s_absoluteDifference;
   }
   enum WagerState {
     REGISTERING, //waiting for players to enter wager
@@ -69,7 +70,13 @@ contract Wager is KeeperCompatibleInterface {
     checkEqualNumPlayers
   {
     //add functionality to ensure correct amount of ether is sent
-    s_players.push(Player({s_playerAddress: playerAddress, s_playerPrediction: playerPrediction}));
+    s_players.push(
+      Player({
+        s_playerAddress: playerAddress,
+        s_playerPrediction: playerPrediction,
+        s_absoluteDifference: 0
+      })
+    );
     //s_players = new address payable[](0); to reset array later
   }
 
@@ -95,22 +102,30 @@ contract Wager is KeeperCompatibleInterface {
   function performUpkeep(
     bytes calldata /* performData */
   ) external override {
+    //ensure upkeep is actually needed
     //get latest price
-    //determine absolute difference between lastest price and prediction 1
-    //determine absolute difference between lastest price and prediction 2
-    //determine which difference is left to determine winner of Wager
+    //determine absolute difference between lastest price and prediction of each player
+    //determine which difference is closest to latest price to determine winner of Wager
     //send funds to winner address
     (bool upkeepNeeded, ) = checkUpkeep(""); //ensure upkeep is truly needed
     if (!upkeepNeeded) {
       revert();
     }
+    address winnerAddress = address(this);
+    int256 bestPredictionDiff = 0;
     (, int256 latestPrice, , , ) = i_priceFeed.latestRoundData();
-    int256 differenceA = abs(latestPrice - ((int256)(s_players[0].s_playerPrediction)));
-    int256 differenceB = abs(latestPrice - ((int256)(s_players[1].s_playerPrediction)));
-    address winner = differenceA > differenceB
-      ? s_players[1].s_playerAddress
-      : s_players[0].s_playerAddress;
-    (bool success, ) = winner.call{value: address(this).balance}("");
+    for (uint32 i = 0; i < s_players.length; ++i) {
+      s_players[i].s_absoluteDifference = abs(
+        latestPrice - ((int256)(s_players[i].s_playerPrediction))
+      );
+      if (i == 0) {
+        bestPredictionDiff = s_players[i].s_absoluteDifference;
+      } else if (s_players[i].s_absoluteDifference < bestPredictionDiff) {
+        bestPredictionDiff = s_players[i].s_absoluteDifference;
+        winnerAddress = s_players[i].s_playerAddress;
+      }
+    }
+    (bool success, ) = winnerAddress.call{value: address(this).balance}("");
     require(success);
   }
 
