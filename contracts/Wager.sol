@@ -5,6 +5,8 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 //maybe add modifier cannotExecute() to prevent checkUpkeep from being called on chain
+
+/* Errors */
 error Wager__Full();
 error Wager__UpkeepNotNeeded();
 

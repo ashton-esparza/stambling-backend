@@ -12,7 +12,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
         ({ deployer, player1, player2, player3 } = await getNamedAccounts());
         await deployments.fixture(["all"]);
         wager = await ethers.getContract("Wager", deployer);
-        mockAggregator = await ethers.getContract("MockAggregator", deployer);
+        mockAggregator = await ethers.getContract("MockV3Aggregator", deployer);
       });
 
       describe("Deployment", function () {
