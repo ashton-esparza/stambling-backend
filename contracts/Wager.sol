@@ -73,11 +73,16 @@ contract Wager is KeeperCompatibleInterface {
     //s_players = new address payable[](0); to reset array later
   }
 
-  function checkUpkeep(bytes calldata)
-    external
+  function checkUpkeep(
+    bytes memory /* checkData */
+  )
+    public
     view
     override
-    returns (bool upkeepNeeded, bytes memory)
+    returns (
+      bool upkeepNeeded,
+      bytes memory /* performData */
+    )
   {
     //corect state is needed; ACTIVE
     //correct addresses entered wager and sent wager amount; should be ensured by state
@@ -87,7 +92,31 @@ contract Wager is KeeperCompatibleInterface {
     upkeepNeeded = (timePassed && correctState);
   }
 
-  function performUpkeep(bytes calldata) external override {}
+  function performUpkeep(
+    bytes calldata /* performData */
+  ) external override {
+    //get latest price
+    //determine absolute difference between lastest price and prediction 1
+    //determine absolute difference between lastest price and prediction 2
+    //determine which difference is left to determine winner of Wager
+    //send funds to winner address
+    (bool upkeepNeeded, ) = checkUpkeep(""); //ensure upkeep is truly needed
+    if (!upkeepNeeded) {
+      revert();
+    }
+    (, int256 latestPrice, , , ) = i_priceFeed.latestRoundData();
+    int256 differenceA = abs(latestPrice - ((int256)(s_players[0].s_playerPrediction)));
+    int256 differenceB = abs(latestPrice - ((int256)(s_players[1].s_playerPrediction)));
+    address winner = differenceA > differenceB
+      ? s_players[1].s_playerAddress
+      : s_players[0].s_playerAddress;
+    (bool success, ) = winner.call{value: address(this).balance}("");
+    require(success);
+  }
+
+  function abs(int256 x) private pure returns (int256) {
+    return x >= 0 ? x : -x;
+  }
 
   function getAggregatorV3() public view returns (address) {
     return address(i_priceFeed);
