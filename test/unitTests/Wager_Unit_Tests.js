@@ -1,6 +1,7 @@
 const { assert, expect } = require("chai");
 const { network, getNamedAccounts, ethers } = require("hardhat");
-const { developmentChains } = require("../../helper-hardhat-config");
+const { boolean } = require("hardhat/internal/core/params/argumentTypes");
+const { developmentChains, networkConfig } = require("../../helper-hardhat-config");
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -42,6 +43,17 @@ const { developmentChains } = require("../../helper-hardhat-config");
           await wager.enterWager(player2, predictionAmount);
           expect(await wager.getWagerState()).to.equal(1);
         });
+
+        it("Upkeep returns true when conditions are satisfied", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(player1, predictionAmount);
+          await wager.enterWager(player2, predictionAmount);
+          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+          await network.provider.request({ method: "evm_mine", params: [] });
+          const { upkeepNeeded } = await wager.checkUpkeep([]);
+          assert(upkeepNeeded);
+        });
       });
 
       describe("Error Handling", function () {
@@ -58,6 +70,12 @@ const { developmentChains } = require("../../helper-hardhat-config");
           const predictionAmount = 1450;
           await wager.enterWager(player1, predictionAmount);
           await wager.enterWager(player2, predictionAmount);
+          await expect(wager.performUpkeep([])).to.be.reverted;
+        });
+
+        it("Reverts if not enough players enter wager", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(player1, predictionAmount);
           await expect(wager.performUpkeep([])).to.be.reverted;
         });
       });
