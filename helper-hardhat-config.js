@@ -13,6 +13,7 @@ const networkConfig = {
   },
   31337: {
     name: "hardhat",
+    keepersUpdateInterval: "10",
   },
 };
 
