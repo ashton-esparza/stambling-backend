@@ -33,7 +33,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           await wager.enterWager(deployer, predictionAmount);
           const players = await wager.getPlayers();
           expect(players[0].s_playerAddress).to.equal(deployer);
-          expect(players[0].s_playerPrediction).to.equal(predictionAmount);
+          expect(players[0].s_playerPrediction / Math.pow(10, 8)).to.equal(predictionAmount);
           expect(players.length).to.equal(1);
         });
 
@@ -53,6 +53,44 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           await network.provider.request({ method: "evm_mine", params: [] });
           const { upkeepNeeded } = await wager.checkUpkeep([]);
           assert(upkeepNeeded);
+        });
+
+        it("Performupkeep succeeds and determines correct winner", async function () {
+          const predictionAmount1 = 1450;
+          const predictionAmount2 = 1850;
+          await wager.enterWager(player1, predictionAmount1);
+          await wager.enterWager(player2, predictionAmount2);
+          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+          await network.provider.request({ method: "evm_mine", params: [] });
+          await wager.performUpkeep([]);
+          const players = await wager.getPlayers();
+          console.log(
+            `Difference is: ${Number(players[0].s_absoluteDifference) / Math.pow(10, 8)}`
+          );
+          console.log(
+            `Difference is: ${Number(players[1].s_absoluteDifference) / Math.pow(10, 8)}`
+          );
+          expect(await wager.getWagerState()).to.equal(3);
+        });
+
+        it("Performupkeep succeeds and determines correct winner pt2", async function () {
+          const predictionAmount1 = 1990;
+          const predictionAmount2 = 2011;
+          await wager.enterWager(player1, predictionAmount1);
+          await wager.enterWager(player2, predictionAmount2);
+          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+          await network.provider.request({ method: "evm_mine", params: [] });
+          await wager.performUpkeep([]);
+          const players = await wager.getPlayers();
+          console.log(
+            `Difference is: ${Number(players[0].s_absoluteDifference) / Math.pow(10, 8)}`
+          );
+          console.log(
+            `Difference is: ${Number(players[1].s_absoluteDifference) / Math.pow(10, 8)}`
+          );
+          expect(await wager.getWagerState()).to.equal(3);
         });
       });
 

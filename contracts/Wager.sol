@@ -73,10 +73,11 @@ contract Wager is KeeperCompatibleInterface {
     checkEqualNumPlayers
   {
     //add functionality to ensure correct amount of ether is sent
+
     s_players.push(
       Player({
         s_playerAddress: playerAddress,
-        s_playerPrediction: playerPrediction,
+        s_playerPrediction: playerPrediction * 100000000,
         s_absoluteDifference: 0
       })
     );
@@ -123,6 +124,7 @@ contract Wager is KeeperCompatibleInterface {
       );
       if (i == 0) {
         bestPredictionDiff = s_players[i].s_absoluteDifference;
+        winnerAddress = s_players[i].s_playerAddress;
       } else if (s_players[i].s_absoluteDifference < bestPredictionDiff) {
         bestPredictionDiff = s_players[i].s_absoluteDifference;
         winnerAddress = s_players[i].s_playerAddress;
@@ -130,6 +132,7 @@ contract Wager is KeeperCompatibleInterface {
     }
     (bool success, ) = winnerAddress.call{value: address(this).balance}("");
     require(success);
+    s_wagerState = WagerState.COMPLETE;
   }
 
   function abs(int256 x) private pure returns (int256) {
