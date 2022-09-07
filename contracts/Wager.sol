@@ -82,6 +82,9 @@ contract Wager is KeeperCompatibleInterface {
     //corect state is needed; ACTIVE
     //correct addresses entered wager and sent wager amount; should be ensured by state
     //enough time is passed
+    bool timePassed = (block.timestamp - s_lastTimeStamp) >= i_interval;
+    bool correctState = (WagerState.ACTIVE == s_wagerState);
+    upkeepNeeded = (timePassed && correctState);
   }
 
   function performUpkeep(bytes calldata) external override {}
