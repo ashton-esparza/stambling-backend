@@ -3,7 +3,8 @@
 pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+//maybe add modifier cannotExecute() to prevent checkUpkeep from being called on chain
 error Wager__Full();
 
 /**@title Stambling's Wager Smart Contract
@@ -11,7 +12,7 @@ error Wager__Full();
  * @notice This contract is for creating wagers within Stambling
  * @dev This implements the Chainlink Data Feeds
  */
-contract Wager {
+contract Wager is KeeperCompatibleInterface {
   /* Type Declarations */
   struct Player {
     address s_playerAddress;
@@ -28,6 +29,7 @@ contract Wager {
   AggregatorV3Interface private immutable i_priceFeed;
   uint32 private constant MAX_NUM_PLAYERS = 2;
   WagerState private s_wagerState;
+  uint256 private immutable i_interval;
 
   /* Wager Variables */
   uint256 private s_predictionA;
@@ -54,8 +56,9 @@ contract Wager {
     }
   }
 
-  constructor(address priceFeedInterface) {
+  constructor(address priceFeedInterface, uint256 interval) {
     i_priceFeed = AggregatorV3Interface(priceFeedInterface);
+    i_interval = interval;
     s_lastTimeStamp = block.timestamp;
     s_wagerState = WagerState.REGISTERING;
   }
@@ -69,6 +72,19 @@ contract Wager {
     s_players.push(Player({s_playerAddress: playerAddress, s_playerPrediction: playerPrediction}));
     //s_players = new address payable[](0); to reset array later
   }
+
+  function checkUpkeep(bytes calldata)
+    external
+    view
+    override
+    returns (bool upkeepNeeded, bytes memory)
+  {
+    //corect state is needed; ACTIVE
+    //correct addresses entered wager and sent wager amount; should be ensured by state
+    //enough time is passed
+  }
+
+  function performUpkeep(bytes calldata) external override {}
 
   function getAggregatorV3() public view returns (address) {
     return address(i_priceFeed);
