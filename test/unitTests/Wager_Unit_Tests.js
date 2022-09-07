@@ -53,5 +53,12 @@ const { developmentChains } = require("../../helper-hardhat-config");
             "Wager__Full"
           );
         });
+
+        it("Reverts if not enough time has passed", async function () {
+          const predictionAmount = 1450;
+          await wager.enterWager(player1, predictionAmount);
+          await wager.enterWager(player2, predictionAmount);
+          await expect(wager.performUpkeep([])).to.be.reverted;
+        });
       });
     });

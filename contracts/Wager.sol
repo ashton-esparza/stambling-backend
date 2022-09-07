@@ -6,6 +6,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 //maybe add modifier cannotExecute() to prevent checkUpkeep from being called on chain
 error Wager__Full();
+error Wager__UpkeepNotNeeded();
 
 /**@title Stambling's Wager Smart Contract
  * @author Ashton Esparza
