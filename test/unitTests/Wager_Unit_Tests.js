@@ -37,9 +37,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
       describe("Functionality", function () {
         it("Player is able to enter wager", async function () {
           const predictionAmount = 1450;
-          await wager.enterWager(deployer, predictionAmount, { value: wagerAmount });
+          await wager.enterWager(player1, predictionAmount, { value: wagerAmount });
           const players = await wager.getPlayers();
-          expect(players[0].s_playerAddress).to.equal(deployer);
+          expect(players[0].s_playerAddress).to.equal(player1);
           expect(players[0].s_playerPrediction / Math.pow(10, 8)).to.equal(predictionAmount);
           expect(players.length).to.equal(1);
         });
@@ -107,7 +107,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           await wager.enterWager(player1, predictionAmount, { value: wagerAmount });
           await wager.enterWager(player2, predictionAmount, { value: wagerAmount });
           await expect(
-            wager.enterWager(player3, predictionAmount, { value: wagerAmount })
+            wager.enterWager(player1, predictionAmount, { value: wagerAmount })
           ).to.be.revertedWith("Wager__Full");
         });
 
@@ -117,6 +117,13 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           await expect(
             wager.enterWager(player1, predictionAmount, { value: underWagerAmount.toString() })
           ).to.be.revertedWith("Wager__IncorrectAmountSent");
+        });
+
+        it("Reverts if player address isnt in wager address list", async function () {
+          const predictionAmount = 1450;
+          await expect(
+            wager.enterWager(player3, predictionAmount, { value: wagerAmount })
+          ).to.be.revertedWith("Wager__AddressInvalid");
         });
 
         it("Reverts if not enough time has passed", async function () {

@@ -3,7 +3,7 @@ const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
   const { deploy, log } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, player1, player2 } = await getNamedAccounts();
   const chainId = network.config.chainId;
   let mockAggregator;
 
@@ -17,7 +17,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   log("Deploying Wager and waiting for confirmations...");
   const keepersUpdateInterval = networkConfig[chainId]["keepersUpdateInterval"] || "20";
   const wagerAmount = networkConfig[chainId]["wagerAmount"] || null;
-  const arguments = [mockAggregator.address, keepersUpdateInterval, wagerAmount];
+  const wagerAddresses = new Array(player1, player2);
+  const arguments = [mockAggregator.address, keepersUpdateInterval, wagerAmount, wagerAddresses];
   const wager = await deploy("Wager", {
     from: deployer,
     args: arguments,

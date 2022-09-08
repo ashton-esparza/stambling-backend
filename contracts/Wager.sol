@@ -10,6 +10,7 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 error Wager__Full();
 error Wager__UpkeepNotNeeded();
 error Wager__IncorrectAmountSent();
+error Wager__AddressInvalid();
 
 /**@title Stambling's Wager Smart Contract
  * @author Ashton Esparza
@@ -36,6 +37,8 @@ contract Wager is KeeperCompatibleInterface {
   WagerState private s_wagerState;
   uint256 private immutable i_interval;
   uint256 private immutable i_wagerAmount;
+  mapping(address => bool) private s_addressesInWager;
+  //address[] private s_arrayOfAddresses;
 
   /* Wager Variables */
   uint256 private s_predictionA;
@@ -48,9 +51,24 @@ contract Wager is KeeperCompatibleInterface {
   /* Events */
 
   /* Function Modifiers */
+  modifier checkIfValidAddress(address playerAddress) {
+    if (!s_addressesInWager[playerAddress]) {
+      revert Wager__AddressInvalid();
+    }
+    //require(s_addressesInWager(playerAddress));
+    _;
+  }
+
   modifier checkTooManyNumPlayers() {
     if (s_players.length >= MAX_NUM_PLAYERS) {
       revert Wager__Full();
+    }
+    _;
+  }
+
+  modifier checkWagerAmountSent() {
+    if (msg.value != i_wagerAmount) {
+      revert Wager__IncorrectAmountSent();
     }
     _;
   }
@@ -65,25 +83,29 @@ contract Wager is KeeperCompatibleInterface {
   constructor(
     address priceFeedInterface,
     uint256 interval,
-    uint256 wagerAmount
+    uint256 wagerAmount,
+    address[] memory addresses
   ) {
     i_priceFeed = AggregatorV3Interface(priceFeedInterface);
     i_interval = interval;
     i_wagerAmount = wagerAmount;
     s_lastTimeStamp = block.timestamp;
     s_wagerState = WagerState.REGISTERING;
+    for (uint32 i = 0; i < addresses.length; i++) {
+      //s_arrayOfAddresses.push(addresses[i]);
+      s_addressesInWager[addresses[i]] = true;
+    }
   }
 
   function enterWager(address playerAddress, uint256 playerPrediction)
     public
     payable
+    checkIfValidAddress(playerAddress)
     checkTooManyNumPlayers
+    checkWagerAmountSent
     checkEqualNumPlayers
   {
     //add functionality to ensure correct amount of ether is sent
-    if (msg.value != i_wagerAmount) {
-      revert Wager__IncorrectAmountSent();
-    }
     s_players.push(
       Player({
         s_playerAddress: playerAddress,
@@ -164,4 +186,8 @@ contract Wager is KeeperCompatibleInterface {
   function getWagerAmount() public view returns (uint256) {
     return i_wagerAmount;
   }
+
+  // function getWagerAddresses() public view returns (address[] memory) {
+  //   return s_arrayOfAddresses;
+  // }
 }
