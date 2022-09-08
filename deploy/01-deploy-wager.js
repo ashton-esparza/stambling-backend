@@ -9,13 +9,14 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
   log("----------------START-01-------------------------------");
   if (developmentChains.includes(network.name)) {
-    log("Getting address for locally deployed MockAggregator contract...");
-    mockAggregator = await ethers.getContract("MockAggregator", deployer);
+    log("Getting address for locally deployed MockV3Aggregator contract...");
+    mockAggregator = await ethers.getContract("MockV3Aggregator", deployer);
   } else {
     log("Trying non-local test network; nothing coded will fail...");
   }
   log("Deploying Wager and waiting for confirmations...");
-  const arguments = [mockAggregator.address];
+  const keepersUpdateInterval = networkConfig[chainId]["keepersUpdateInterval"] || "20";
+  const arguments = [mockAggregator.address, keepersUpdateInterval];
   const wager = await deploy("Wager", {
     from: deployer,
     args: arguments,
