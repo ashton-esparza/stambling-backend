@@ -14,6 +14,7 @@ const networkConfig = {
   31337: {
     name: "hardhat",
     keepersUpdateInterval: "10",
+    wagerAmount: "100000000000000000", //0.1 eth
   },
 };
 

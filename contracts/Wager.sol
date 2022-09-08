@@ -9,6 +9,7 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 /* Errors */
 error Wager__Full();
 error Wager__UpkeepNotNeeded();
+error Wager__IncorrectAmountSent();
 
 /**@title Stambling's Wager Smart Contract
  * @author Ashton Esparza
@@ -34,6 +35,7 @@ contract Wager is KeeperCompatibleInterface {
   uint32 private constant MAX_NUM_PLAYERS = 2;
   WagerState private s_wagerState;
   uint256 private immutable i_interval;
+  uint256 private immutable i_wagerAmount;
 
   /* Wager Variables */
   uint256 private s_predictionA;
@@ -60,20 +62,28 @@ contract Wager is KeeperCompatibleInterface {
     }
   }
 
-  constructor(address priceFeedInterface, uint256 interval) {
+  constructor(
+    address priceFeedInterface,
+    uint256 interval,
+    uint256 wagerAmount
+  ) {
     i_priceFeed = AggregatorV3Interface(priceFeedInterface);
     i_interval = interval;
+    i_wagerAmount = wagerAmount;
     s_lastTimeStamp = block.timestamp;
     s_wagerState = WagerState.REGISTERING;
   }
 
   function enterWager(address playerAddress, uint256 playerPrediction)
     public
+    payable
     checkTooManyNumPlayers
     checkEqualNumPlayers
   {
     //add functionality to ensure correct amount of ether is sent
-
+    if (msg.value != i_wagerAmount) {
+      revert Wager__IncorrectAmountSent();
+    }
     s_players.push(
       Player({
         s_playerAddress: playerAddress,
@@ -149,5 +159,9 @@ contract Wager is KeeperCompatibleInterface {
 
   function getWagerState() public view returns (WagerState) {
     return s_wagerState;
+  }
+
+  function getWagerAmount() public view returns (uint256) {
+    return i_wagerAmount;
   }
 }

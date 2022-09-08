@@ -6,13 +6,14 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Wager Unit Tests", function () {
-      let deployer, player1, player2, player3, wager, mockAggregator;
+      let deployer, player1, player2, player3, wager, mockAggregator, chainId;
 
       beforeEach(async function () {
         ({ deployer, player1, player2, player3 } = await getNamedAccounts());
         await deployments.fixture(["all"]);
         wager = await ethers.getContract("Wager", deployer);
         mockAggregator = await ethers.getContract("MockV3Aggregator", deployer);
+        chainId = network.config.chainId;
       });
 
       describe("Deployment", function () {
@@ -24,6 +25,11 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
         it("Initializes the wager state correctly", async function () {
           const wagerState = await wager.getWagerState();
           assert.equal(wagerState, 0);
+        });
+
+        it("Initializes the wager amount correctly", async function () {
+          const wagerAmount = await wager.getWagerAmount();
+          assert.equal(wagerAmount, networkConfig[chainId]["wagerAmount"]);
         });
       });
 
@@ -48,7 +54,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           const predictionAmount = 1450;
           await wager.enterWager(player1, predictionAmount);
           await wager.enterWager(player2, predictionAmount);
-          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          const interval = networkConfig[chainId]["keepersUpdateInterval"];
           await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
           await network.provider.request({ method: "evm_mine", params: [] });
           const { upkeepNeeded } = await wager.checkUpkeep([]);
@@ -60,7 +66,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           const predictionAmount2 = 1850;
           await wager.enterWager(player1, predictionAmount1);
           await wager.enterWager(player2, predictionAmount2);
-          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          const interval = networkConfig[chainId]["keepersUpdateInterval"];
           await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
           await network.provider.request({ method: "evm_mine", params: [] });
           await wager.performUpkeep([]);
@@ -79,7 +85,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           const predictionAmount2 = 2011;
           await wager.enterWager(player1, predictionAmount1);
           await wager.enterWager(player2, predictionAmount2);
-          const interval = networkConfig[network.config.chainId]["keepersUpdateInterval"];
+          const interval = networkConfig[chainId]["keepersUpdateInterval"];
           await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
           await network.provider.request({ method: "evm_mine", params: [] });
           await wager.performUpkeep([]);

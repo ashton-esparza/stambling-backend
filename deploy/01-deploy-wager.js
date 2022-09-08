@@ -16,7 +16,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   }
   log("Deploying Wager and waiting for confirmations...");
   const keepersUpdateInterval = networkConfig[chainId]["keepersUpdateInterval"] || "20";
-  const arguments = [mockAggregator.address, keepersUpdateInterval];
+  const wagerAmount = networkConfig[chainId]["wagerAmount"] || null;
+  const arguments = [mockAggregator.address, keepersUpdateInterval, wagerAmount];
   const wager = await deploy("Wager", {
     from: deployer,
     args: arguments,
