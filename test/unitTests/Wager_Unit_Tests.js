@@ -106,9 +106,17 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
           const predictionAmount = 1450;
           await wager.enterWager(player1, predictionAmount, { value: wagerAmount });
           await wager.enterWager(player2, predictionAmount, { value: wagerAmount });
-          await expect(wager.enterWager(player3, predictionAmount)).to.be.revertedWith(
-            "Wager__Full"
-          );
+          await expect(
+            wager.enterWager(player3, predictionAmount, { value: wagerAmount })
+          ).to.be.revertedWith("Wager__Full");
+        });
+
+        it("Reverts if msg.value does not meet wagerAmount", async function () {
+          const predictionAmount = 1450;
+          const underWagerAmount = wagerAmount - 50;
+          await expect(
+            wager.enterWager(player1, predictionAmount, { value: underWagerAmount.toString() })
+          ).to.be.revertedWith("Wager__IncorrectAmountSent");
         });
 
         it("Reverts if not enough time has passed", async function () {
